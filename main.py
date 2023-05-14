@@ -40,13 +40,5 @@ def chat():
     if data:
         return check_profanity(data)
 
-@app.route('/login', methods=['POST'])
-def login():
-    return True
-
-@app.route('/signup', methods=['POST'])
-def signup():
-    return True
-
 if __name__ == '__main__':
     app.run(debug=True)
