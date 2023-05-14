@@ -1,9 +1,13 @@
 import base64
+import os
 import pickle
+import uuid
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from audioCheck import check_profanity_audio, check_profanity
+from audioCheck import check_profanity_audio, check_profanity, check_profanity_audio_google
 from videoCheck import check_profanity_video
+import datetime
 
 app = Flask(__name__)
 CORS(app)
@@ -16,15 +20,26 @@ def process_data():
     if data:
         # Decode the base64 data and save it to a file
         binary_data = base64.b64decode(data.split(',')[1])
-        with open('recording.webm', 'wb') as f:
+        basename = "mylogfile"
+        suffix = datetime.datetime.now().strftime("%y%m%d_%H%M%S")
+        filename = "_".join([basename, suffix]) + '.webm'
+        print(filename)
+        with open(filename, 'wb') as f:
             f.write(binary_data)
-
-        audio_profanity = check_profanity_audio('recording.webm')
-        videoProfanity = check_profanity_video('recording.webm')
+        try:
+            # audio_profanity = check_profanity_audio(filename)
+            audio_profanity = check_profanity_audio_google(filename)
+        except:
+            audio_profanity = False
+        try:
+            videoProfanity = False
+        except:
+            videoProfanity = False
+        # delete the file
+        os.remove(filename)
         # Perform any necessary processing here
         # For example, you can convert the data to a pickle object
         # pickle.dump(binary_data, open("recording.pkl", "wb"))
-
         return jsonify({'message': 'Data processed successfully',
                         'audio_profanity': audio_profanity,
                         'video_profanity': videoProfanity,
@@ -35,15 +50,22 @@ def process_data():
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    print('recieved something')
     data = request.json.get('data')
+    print(data)
     if data:
-        return check_profanity(data)
-
+        return jsonify({'message': 'Data processed successfully',
+                        'profanity': check_profanity(data)
+                        }), 200
+    else:
+        return jsonify({'message': 'Invalid data'}), 400
 @app.route('/login', methods=['POST'])
 def login():
-    return True
-
+    email = request.form['email']
+    password = request.form['password']
+    image = request.files['image']
+    print(image)
+    print(email, password)
+    return jsonify({'message': 'Data processed successfully',}), 200
 @app.route('/signup', methods=['POST'])
 def signup():
     return True

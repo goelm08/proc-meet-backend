@@ -1,6 +1,17 @@
 import subprocess
 import os
 import speech_recognition as sr
+import torch
+import librosa
+import numpy as np
+import soundfile as sf
+from IPython.display import Audio
+from transformers import Wav2Vec2ForCTC, Wav2Vec2Tokenizer
+
+
+# Initialize tokenizer and model
+tokenizer = Wav2Vec2Tokenizer.from_pretrained("facebook/wav2vec2-base-960h")
+model = Wav2Vec2ForCTC.from_pretrained("facebook/wav2vec2-base-960h")
 
 def extract_audio(input_file, output_file):
     command = [
@@ -21,7 +32,29 @@ def check_profanity(text):
             return True
     return False
 
+
 def check_profanity_audio(video_file_path):
+    audio_file_name = video_file_path.split('.')[0] + '.wav'
+    extract_audio(video_file_path, audio_file_name)
+    input_audio, _ = librosa.load(audio_file_name, sr=16000)
+
+    # Tokenize the input audio
+    input_values = tokenizer(input_audio, return_tensors="pt").input_values
+
+    # Get logits from the model
+    logits = model(input_values).logits
+
+    # Get the predicted token ids
+    predicted_ids = torch.argmax(logits, dim=-1)
+
+    # Decode the token ids to get the transcription
+    transcription = tokenizer.batch_decode(predicted_ids)[0]
+    print(transcription)
+    os.remove(audio_file_name)
+    return check_profanity(transcription)
+
+
+def check_profanity_audio_google(video_file_path):
     audio_file_name = video_file_path.split('.')[0] + '.wav'
     extract_audio(video_file_path, audio_file_name)
     r = sr.Recognizer()

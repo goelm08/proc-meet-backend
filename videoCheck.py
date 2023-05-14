@@ -13,7 +13,7 @@ def check_gun(img_path):
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
     # Perform object detection
-    watches = watch_cascade.detectMultiScale(gray, 1.3, 25, minSize = (100,100))
+    watches = watch_cascade.detectMultiScale(gray, 1.3, 50, minSize = (100,100))
     for (x, y, w, h) in watches:
         cv2.rectangle(img, (x, y), (x+w, y+h), (255, 0, 0), 2)
 
