@@ -2,8 +2,8 @@ import os
 import subprocess
 import shutil
 from nsfw_detector import predict
-nsfw_model = predict.load_model(r"C:\Users\goelm\Downloads\february_2019_nsfw.299x299.h5")
-
+# nsfw_model = predict.load_model(r"C:\Users\goelm\Downloads\february_2019_nsfw.299x299.h5")
+nsfw_model = predict.load_model(r"C:\Users\Abhishek\Downloads\february_2019_nsfw.299x299 (1).h5")
 import cv2
 watch_cascade=cv2.CascadeClassifier(r'cascade.xml')
 
